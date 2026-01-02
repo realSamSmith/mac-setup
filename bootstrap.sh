@@ -67,7 +67,7 @@ cd "$HOME/$REPO_DIR"
 
 # Step 5: Install required Ansible collection
 echo "Step 5: Installing community.general collection..."
-ansible-galaxy collection install --quiet community.general
+ansible-galaxy collection install community.general
 
 # Step 6: Run the playbook
 echo "Step 6: Running the Ansible playbook (setup_mac.yml)..."
