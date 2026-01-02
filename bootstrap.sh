@@ -93,6 +93,7 @@ read "?Do you want to remove this temporary directory now? (y/N) " response
 if [[ "$response" =~ ^[Yy]$ ]]; then
     echo "Removing $HOME/$REPO_DIR..."
     rm -rf "$HOME/$REPO_DIR"
+    rm -rf "$HOME/.ansible"
     echo "Cleanup complete. All setup files have been removed."
 else
     echo "Keeping the repository at $HOME/$REPO_DIR"
