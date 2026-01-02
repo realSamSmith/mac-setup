@@ -1,0 +1,48 @@
+---
+# File: roles/1Password/tasks/main.yml
+# (updated to use variables from vars/main.yml)
+
+- name: Open 1Password app
+  command: open -a 1Password
+
+- name: Prompt user to configure 1Password settings
+  ansible.builtin.pause:
+    prompt: |
+      Please launch 1Password, sign in to your account, then go to Settings > Developer
+      and check 'Use the SSH agent' and 'Connect with 1Password CLI'.
+      Press Enter to continue...
+
+- name: Create ~/.ssh directory
+  file:
+    path: ~/.ssh
+    state: directory
+    mode: '0700'
+
+- name: Create ~/.config/1Password/ssh directory
+  file:
+    path: ~/.config/1Password/ssh
+    state: directory
+    mode: '0700'
+
+- name: Set up agent.toml for 1Password SSH
+  copy:
+    dest: ~/.config/1Password/ssh/agent.toml
+    mode: '0600'
+    content: |
+      [[ssh-keys]]
+      item = "{{ op_ssh_item }}"
+      vault = "{{ op_ssh_vault }}"
+
+- name: Configure SSH config to use 1Password agent
+  copy:
+    dest: ~/.ssh/config
+    mode: '0600'
+    content: |
+      Host *
+        IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
+- name: Set SSH_AUTH_SOCK environment variable
+  lineinfile:
+    path: ~/.zshenv
+    line: 'export SSH_AUTH_SOCK=~/Library/Group\\ Containers/2BUA8C4S2C.com.1password/t/agent.sock'
+    create: true

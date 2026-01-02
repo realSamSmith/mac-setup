@@ -1,0 +1,23 @@
+---
+# File: roles/chezmoi/tasks/main.yml
+# Updated to use the new dedicated variable
+
+- name: Ensure chezmoi is installed
+  community.general.homebrew:
+    name: chezmoi
+    state: present
+
+- name: Initialize chezmoi with dotfiles repo
+  command: chezmoi init {{ chezmoi_repo }}
+
+- name: Apply chezmoi changes
+  command: chezmoi apply
+
+- name: Create symlink for .zshenv
+  file:
+    src: ~/.config/zsh/.zshenv
+    dest: ~/.zshenv
+    state: link
+
+- name: Open Ghostty app
+  command: open -a Ghostty

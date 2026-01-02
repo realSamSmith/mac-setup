@@ -1,0 +1,19 @@
+---
+# File: setup_mac.yml
+# Main playbook - updated to load multiple variable files
+
+- name: Set up Mac with Homebrew, 1Password, chezmoi, and configurations
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+
+  vars_files:
+    - vars/main.yml          # Core variables (1Password, chezmoi repo)
+    - vars/brew_packages.yml # Homebrew packages
+    - vars/brew_casks.yml    # Homebrew casks
+
+  roles:
+    - homebrew
+    - 1Password
+    - chezmoi

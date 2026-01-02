@@ -1,0 +1,12 @@
+---
+# File: vars/brew_packages.yml
+# Dedicated file for Homebrew formulae/packages
+
+brew_packages:
+  - bat
+  - coreutils
+  - eza
+  - fzf
+  - oh-my-posh
+  - tealdeer
+  - zoxide

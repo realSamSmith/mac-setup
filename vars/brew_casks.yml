@@ -1,0 +1,9 @@
+---
+# File: vars/brew_casks.yml
+# Dedicated file for Homebrew casks
+
+brew_casks:
+  - ghostty
+  - font-fira-code-nerd-font
+  - 1password
+  - 1password-cli
