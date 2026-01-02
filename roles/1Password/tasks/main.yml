@@ -9,8 +9,7 @@
   ansible.builtin.pause:
     prompt: |
       Please launch 1Password, sign in to your account, then go to Settings > Developer
-      and check 'Use the SSH agent' and 'Connect with 1Password CLI'.
-      Press Enter to continue...
+      and check 'Use the SSH agent' and 'Connect with 1Password CLI' Press Enter to continue...
 
 - name: Create ~/.ssh directory
   file:
