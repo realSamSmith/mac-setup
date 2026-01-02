@@ -3,8 +3,8 @@
 # Bootstrap script to set up a new Mac by downloading and running the Ansible playbook from GitHub
 # After successful setup, it offers to clean up the cloned repository (including itself)
 
-REPO_URL="https://github.com/yourusername/mac-setup.git"
-REPO_DIR="macos-ansible-setup"
+REPO_URL="https://github.com/realSamSmith/mac-setup.git"
+REPO_DIR="mac-setup"
 
 echo "=== Mac Setup Bootstrap Script ==="
 echo "This script will:"
