@@ -2,19 +2,15 @@
 # File: setup_mac.yml
 # Main playbook - updated to load multiple variable files
 
+# Ensure community.general collection is installed
 - name: Bootstrap required Ansible collections
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
-    - name: Check if community.general collection is installed
-      ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.ansible/collections/ansible_collections/community/general"
-      register: community_general_collection
-
-    - name: Install community.general collection if missing
-      ansible.builtin.command: ansible-galaxy collection install community.general
-      when: not community_general_collection.stat.exists
+    - name: Install community.general collection (always runs, but idempotent)
+      ansible.builtin.command: ansible-galaxy collection install community.general --force
+      changed_when: true 
 
 - name: Set up Mac with Homebrew Packages/Casks, 1Password, chezmoi, and dotfiles
   hosts: localhost
