@@ -2,7 +2,21 @@
 # File: setup_mac.yml
 # Main playbook - updated to load multiple variable files
 
-- name: Set up Mac with Homebrew, 1Password, chezmoi, and configurations
+- name: Bootstrap required Ansible collections
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Check if community.general collection is installed
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.ansible/collections/ansible_collections/community/general"
+      register: community_general_collection
+
+    - name: Install community.general collection if missing
+      ansible.builtin.command: ansible-galaxy collection install community.general
+      when: not community_general_collection.stat.exists
+
+- name: Set up Mac with Homebrew Packages/Casks, 1Password, chezmoi, and dotfiles
   hosts: localhost
   connection: local
   become: false
@@ -12,6 +26,12 @@
     - vars/main.yml          # Core variables (1Password, chezmoi repo)
     - vars/brew_packages.yml # Homebrew packages
     - vars/brew_casks.yml    # Homebrew casks
+
+  pre_tasks:
+    - name: Ensure Ansible is installed via Homebrew
+      community.general.homebrew:
+        name: ansible
+        state: present
 
   roles:
     - homebrew

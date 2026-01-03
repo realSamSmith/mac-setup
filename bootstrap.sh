@@ -42,15 +42,19 @@ if ! command -v brew >/dev/null 2>&1; then
         eval "$(/usr/local/bin/brew shellenv)"
     fi
 else
-    echo "Homebrew already installed."
+    echo "Homebrew already installed, moving ahead."
 fi
 
 # Update Homebrew
 brew update
 
 # Step 3: Install Ansible
-echo "Step 3: Installing Ansible..."
-brew install ansible
+echo "Installing Ansible if needed..."
+if ! command -v ansible &> /dev/null; then
+    brew install ansible
+else
+    echo "Ansible already installed, moving ahead."
+fi
 
 # Step 4: Clone the repository
 echo "Step 4: Cloning your Ansible repository from $REPO_URL..."
@@ -66,8 +70,8 @@ fi
 cd "$HOME/$REPO_DIR"
 
 # Step 5: Install required Ansible collection
-echo "Step 5: Installing community.general collection..."
-ansible-galaxy collection install community.general
+# echo "Step 5: Installing community.general collection..."
+# ansible-galaxy collection install community.general
 
 # Step 6: Run the playbook
 echo "Step 6: Running the Ansible playbook (setup_mac.yml)..."
