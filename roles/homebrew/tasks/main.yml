@@ -23,3 +23,7 @@
 
 - name: Clean up Homebrew
   command: brew cleanup
+  
+- name: Turn analytics off
+  command: brew analytics off
+  
