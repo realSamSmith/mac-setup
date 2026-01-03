@@ -2,9 +2,10 @@
 # File: vars/main.yml
 # Core variables (non-package related)
 
-# 1Password SSH agent.toml variables
+# 1Password SSH agent.toml variables.
+# Point this to your 1Password github SSH key and the vault it's in.
 op_ssh_item: "GitHub SSH Key - realSamSmith"
 op_ssh_vault: "Dev"
 
-# Chezmoi dotfiles repository
+# This is my private Chezmoi dotfiles repository (for now). Update this to yours.
 chezmoi_repo: "git@github.com:realSamSmith/dotfiles"

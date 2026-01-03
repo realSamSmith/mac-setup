@@ -1,0 +1,28 @@
+# Ignore the .env files
+.env
+
+# Ignore the ansible collections directory
+ansible/collections/
+
+# Ignore the ansible roles directory
+# ansible/roles/
+
+# Ignore the temporary ansible directory
+.ansible/
+
+# Ignore the log directory
+logs/
+
+# Ansible vault files (contain sensitive tokens)
+ansible/group_vars/local/vault.yml
+ansible/vault-pass.txt
+
+.vscode
+
+# Claude Code local settings
+.claude/settings.local.json
+
+.cirrus.yml
+.cursorrules
+guu.zsh
+ZZZ_runline.sh
