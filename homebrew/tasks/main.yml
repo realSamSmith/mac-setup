@@ -1,0 +1,29 @@
+---
+# File: roles/homebrew/tasks/main.yml
+# (unchanged except it now uses variables from vars/main.yml)
+
+- name: Check if Homebrew is installed
+  command: which brew
+  register: brew_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Install Homebrew packages
+  community.general.homebrew:
+    name: "{{ brew_packages }}"
+    state: present
+
+- name: Install Homebrew casks
+  community.general.homebrew_cask:
+    name: "{{ brew_casks }}"
+    state: present
+
+- name: Upgrade all Homebrew formulae and casks
+  command: brew upgrade
+
+- name: Clean up Homebrew
+  command: brew cleanup
+  
+- name: Turn analytics off
+  command: brew analytics off
+  
