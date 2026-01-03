@@ -8,7 +8,7 @@
   connection: local
   gather_facts: false
   tasks:
-    - name: Install community.general collection (always runs, but idempotent)
+    - name: Install community.general collection
       ansible.builtin.command: ansible-galaxy collection install community.general --force
       changed_when: true 
 

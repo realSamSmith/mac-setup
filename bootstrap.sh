@@ -1,109 +1,131 @@
-#!/bin/zsh
-
-# Bootstrap script to set up a new Mac by downloading and running the Ansible playbook from GitHub
-# After successful setup, it offers to clean up the cloned repository (including itself)
+#!/usr/bin/env zsh
+# =============================================================================
+# Mac Setup Bootstrap Script
+# =============================================================================
+# This script fully automates the initial setup of a new Mac by:
+# 1. Installing Xcode Command Line Tools (automatically waits until done)
+# 2. Installing Homebrew (if missing)
+# 3. Installing Ansible via Homebrew
+# 4. Cloning your "mac-setup" repository from GitHub
+# 5. Running your main Ansible playbook
+# 6. Offering to clean up the temporary cloned repo
+#
+# No manual key presses required except during interactive playbook steps
+# (e.g., signing into 1Password).
+# =============================================================================
 
 REPO_URL="https://github.com/realSamSmith/mac-setup.git"
-REPO_DIR="mac-setup"
+REPO_DIR="$HOME/mac-setup"
 
-echo "=== Mac Setup Bootstrap Script ==="
-echo "This script will:"
-echo "  - Install Xcode Command Line Tools (if needed)"
-echo "  - Install Homebrew (if needed)"
-echo "  - Install Ansible"
-echo "  - Clone your Ansible repository"
-echo "  - Install required Ansible collection"
-echo "  - Run the setup playbook"
-echo "  - Offer to remove the temporary cloned repository"
-echo ""
+echo "=== Mac Setup Bootstrap ==="
+echo "This script will prepare your Mac with all required tools and run your configuration."
+echo
 
-# Step 1: Install Xcode Command Line Tools
-echo "Step 1: Installing Xcode Command Line Tools..."
-if ! xcode-select -p > /dev/null; then
-    xcode-select --install
-	# Wait for it to finish.
-	echo "The installation could take some time. Once it finishes press Enter to continue."
-	read "?Press Enter to continue..."
-	echo    # Adds a newline after the keypress
+# -----------------------------------------------------------------------------
+# Step 1: Install Xcode Command Line Tools (with automatic wait)
+# -----------------------------------------------------------------------------
+echo "Step 1: Ensuring Xcode Command Line Tools are installed..."
+
+if xcode-select -p &>/dev/null; then
+    echo "   ✓ Xcode Command Line Tools already installed."
 else
-	echo "Xcode Command Line Tools already installed, moving ahead."
+    echo "   Installing Xcode Command Line Tools..."
+    xcode-select --install
+
+    # Wait until the tools are actually installed
+    echo "   Waiting for installation to complete..."
+    while ! xcode-select -p &>/dev/null; do
+        sleep 10
+    done
+    echo "   ✓ Xcode Command Line Tools installed successfully."
 fi
 
-# Step 2: Install Homebrew if not present
-echo "Step 2: Installing Homebrew (if not already installed)..."
-if ! command -v brew >/dev/null 2>&1; then
-    echo "Downloading and installing Homebrew..."
+# -----------------------------------------------------------------------------
+# Step 2: Install and update Homebrew
+# -----------------------------------------------------------------------------
+echo "Step 2: Ensuring Homebrew is installed and up to date..."
+
+if command -v brew &>/dev/null; then
+    echo "   ✓ Homebrew already installed."
+else
+    echo "   Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    # Add Homebrew to PATH for this session
+    # Activate Homebrew in the current shell session
     if [[ $(uname -m) == "arm64" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     else
         eval "$(/usr/local/bin/brew shellenv)"
     fi
-else
-    echo "Homebrew already installed, moving ahead."
+    echo "   ✓ Homebrew installed."
 fi
 
-# Update Homebrew
-brew update
+echo "   Updating Homebrew..."
+brew update --quiet
 
+# -----------------------------------------------------------------------------
 # Step 3: Install Ansible
-echo "Installing Ansible if needed..."
-if ! command -v ansible &> /dev/null; then
+# -----------------------------------------------------------------------------
+echo "Step 3: Ensuring Ansible is installed..."
+
+if command -v ansible &>/dev/null; then
+    echo "   ✓ Ansible already installed."
+else
+    echo "   Installing Ansible via Homebrew..."
     brew install ansible
-else
-    echo "Ansible already installed, moving ahead."
+    echo "   ✓ Ansible installed."
 fi
 
-# Step 4: Clone the repository
-echo "Step 4: Cloning your Ansible repository from $REPO_URL..."
-if [[ -d "$HOME/$REPO_DIR" ]]; then
-    echo "Directory $REPO_DIR already exists. Pulling latest changes..."
-    cd "$HOME/$REPO_DIR"
-    git pull --quiet
-    cd ..
+# -----------------------------------------------------------------------------
+# Step 4: Clone or update the mac-setup repository
+# -----------------------------------------------------------------------------
+echo "Step 4: Fetching your setup repository..."
+
+if [[ -d "$REPO_DIR" ]]; then
+    echo "   Repository exists — updating with latest changes..."
+    (cd "$REPO_DIR" && git pull --quiet)
 else
-    git clone --quiet "$REPO_URL" "$HOME/$REPO_DIR"
+    echo "   Cloning repository from GitHub..."
+    git clone --quiet "$REPO_URL" "$REPO_DIR"
 fi
 
-cd "$HOME/$REPO_DIR"
+cd "$REPO_DIR" || { echo "Failed to enter $REPO_DIR"; exit 1; }
 
-# Step 5: Install required Ansible collection
-# echo "Step 5: Installing community.general collection..."
-# ansible-galaxy collection install community.general
-
-# Step 6: Run the playbook
-echo "Step 6: Running the Ansible playbook (setup_mac.yml)..."
-echo "You will be prompted for manual steps during the playbook (e.g., 1Password setup)."
-echo ""
+# -----------------------------------------------------------------------------
+# Step 5: Run the main Ansible playbook
+# -----------------------------------------------------------------------------
+echo "Step 5: Running your Mac setup playbook..."
+echo "   Note: You will be prompted for manual steps (e.g., signing into 1Password)."
+echo
 
 if ansible-playbook setup_mac.yml; then
-    echo ""
+    echo
     echo "=== Setup completed successfully! ==="
 else
-    echo ""
-    echo "⚠️  Ansible playbook failed. Check the output above for details."
-    echo "You can investigate in $HOME/$REPO_DIR or re-run the script later."
+    echo
+    echo "⚠️  The Ansible playbook failed. See output above for details."
+    echo "   You can debug or re-run later from: $REPO_DIR"
     exit 1
 fi
 
-# Step 7: Offer cleanup
-echo ""
-echo "Cleanup option:"
-echo "The setup files were cloned to: $HOME/$REPO_DIR"
-read "?Do you want to remove this temporary directory now? (y/N) " response
+# -----------------------------------------------------------------------------
+# Step 7: Offer to clean up the cloned repository
+# -----------------------------------------------------------------------------
+echo
+echo "Cleanup:"
+echo "   The setup files are located at: $REPO_DIR"
 
+read -q "response?Remove this temporary directory now? (y/N) "
+echo
 if [[ "$response" =~ ^[Yy]$ ]]; then
-    echo "Removing $HOME/$REPO_DIR..."
-    rm -rf "$HOME/$REPO_DIR"
-    rm -rf "$HOME/.ansible"
-    echo "Cleanup complete. All setup files have been removed."
+    echo "   Removing $REPO_DIR and Ansible cache..."
+    rm -rf "$REPO_DIR" "$HOME/.ansible"
+    echo "   Cleanup complete."
 else
-    echo "Keeping the repository at $HOME/$REPO_DIR"
-    echo "You can re-run the playbook anytime with:"
-    echo "  cd ~/$REPO_DIR && ansible-playbook setup_mac.yml"
+    echo "   Repository preserved at $REPO_DIR"
+    echo "   To re-run the setup later:"
+    echo "       cd $REPO_DIR && ansible-playbook setup_mac.yml"
 fi
 
-echo ""
-echo "Enjoy your newly configured Mac! 🚀"
+echo
+echo "Enjoy your freshly configured Mac! 🚀"
